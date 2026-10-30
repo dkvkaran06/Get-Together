@@ -1,333 +1,322 @@
-# TicketCharge Hub
+# 🎟️ GetTogether — Event Discovery, Ticketing & Gate Verification Platform
 
-A full-stack event management platform built with React, Node.js, Express, and PostgreSQL. Users can browse events, and organizers can create and manage their events.
+<div align="center">
 
-## Features
+![GetTogether Banner](https://img.shields.io/badge/Platform-GetTogether-3b82f6?style=for-the-badge&logo=ticketmaster&logoColor=white)
+![React](https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)
+![MongoDB](https://img.shields.io/badge/MongoDB_Atlas-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Razorpay](https://img.shields.io/badge/Razorpay-02042B?style=for-the-badge&logo=razorpay&logoColor=3395FF)
+![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white)
 
-### User Features
-- User authentication (sign up, sign in)
-- Browse upcoming and past events
-- View event details
-- User profile management
+<p align="center">
+  <b>A comprehensive, production-ready MERN platform for seamless event management, multi-attendee ticketing, secure online payments, and camera-based gate QR verification.</b>
+</p>
 
-### Organizer Features
-- Organizer authentication
-- Create, update, and delete events
-- Manage event listings
-- View organizer dashboard
+[Explore Features](#-key-features) • [System Architecture](#-system-architecture) • [Getting Started](#-getting-started) • [API Documentation](#-api-endpoints) • [Tech Stack](#-tech-stack)
 
-### Technical Features
-- JWT-based authentication
-- PostgreSQL database
-- RESTful API
-- Responsive UI with Tailwind CSS
-- TypeScript for type safety
+</div>
 
-## Tech Stack
+---
+
+## 🌟 Overview
+
+**GetTogether** is an end-to-end event management and ticketing ecosystem designed to solve real-world logistical challenges for attendees, organizers, and platform administrators. Built on a resilient **MERN stack + TypeScript** foundation, it handles everything from browsing categorized events with dynamic filters, through secure **Razorpay** checkout and automated **PDF ticket generation**, to zero-hardware **in-browser camera QR scanning** at the venue door.
+
+---
+
+## 👥 Three Tailored Experiences
+
+```mermaid
+flowchart LR
+    A["👤 Attendees"] -->|Discover, Book, Download Tickets| Platform[("🎟️ GetTogether Platform")]
+    B["🎪 Organizers"] -->|Manage Events, Gate Check-In, Analytics| Platform
+    C["🛡️ Platform Admins"] -->|User Governance, Payouts, Maintenance| Platform
+```
+
+### 1. 👤 Attendee Experience
+- **Dynamic Discovery**: Dark-mode UI with categorized filtering (Music, Tech, Workshops, Sports), search bar, and interactive typewriter headings.
+- **Multi-Attendee Booking**: Reserve multiple seats in a single checkout with per-attendee names, emails, and internationally validated phone numbers (`libphonenumber-js`).
+- **Flexible Authentication**: 
+  - Traditional Email + Password with bcrypt encryption.
+  - Passwordless 6-digit OTP login via email.
+  - In-app self-service password reset via email OTP (no broken email reset links).
+- **Instant Digital Tickets**: Automatic generation of A4 PDF tickets embedded with unique scannable QR codes sent via transactional emails.
+
+### 2. 🎪 Organizer Dashboard
+- **Full Lifecycle Event Management**: Create, update, publish, or cancel events with poster uploads powered by Cloudinary CDN.
+- **In-Browser Gate Verification (Zero Hardware)**: 
+  - Mobile & webcam camera QR scanner powered by `jsQR`.
+  - Instant duplicate ticket detection (prevents reused/tampered QR codes).
+  - Real-time check-in stats and attendance tracking.
+- **Revenue & Analytics**: Monitor ticket sales velocity, total earnings, remaining seats, and request payouts.
+
+### 3. 🛡️ Administrator Portal
+- **Dedicated Admin Portal**: Segregated authentication and role-based permissions (`super-admin` / `admin`).
+- **Platform Analytics**: Total revenue GMV, platform-wide user growth, and active event metrics.
+- **User & Organizer Governance**: Inspect user profiles, roles, and event ownership.
+- **Organizer Payout Management**: Review, approve, and track payout requests.
+- **Global Maintenance Mode**: Instant platform-wide maintenance toggle returning `503 Service Unavailable` for public routes while keeping admin controls accessible.
+
+---
+
+## 🚀 Key Features
+
+| Category | Feature | Description |
+|---|---|---|
+| 💳 **Payments** | **Razorpay Integration** | End-to-end payment modal with server-side HMAC-SHA256 signature verification to prevent tampering. |
+| 📱 **Check-in** | **Camera QR Scanner** | Browser-based QR scanning directly from any laptop or smartphone camera for instant attendee admission. |
+| 📄 **Ticketing** | **In-Memory PDF Engine** | PDFKit stream generator produces branded A4 tickets with individual QR codes on the fly without disk overhead. |
+| 📧 **Notifications** | **Dual Email Engine** | Brevo API + Nodemailer SMTP with exponential backoff retry logic for zero dropped booking confirmations. |
+| ☁️ **Media** | **Cloudinary Storage** | Cloud-stored, CDN-cached event poster images with automatic formatting and responsiveness. |
+| 🔒 **Security** | **Enterprise Auth** | Stateless JWT authentication, role-based route guards, and encrypted password hashing via `bcryptjs`. |
+
+---
+
+## 🏗️ System Architecture
+
+```mermaid
+flowchart TD
+    subgraph Client["Frontend (React 18 + TypeScript + Vite)"]
+        UI["Tailwind CSS + shadcn/ui"]
+        State["TanStack React Query"]
+        Scanner["Camera QR Scanner (jsQR)"]
+        RazorpayClient["Razorpay Checkout Modal"]
+    end
+
+    subgraph Server["Backend (Node.js + Express REST API)"]
+        AuthMW["Auth & RBAC Middleware"]
+        MaintMW["Maintenance Mode Middleware"]
+        Controllers["Controllers (Booking, Event, Auth, Admin)"]
+        PDFGen["PDFKit Streaming Engine"]
+        EmailService["Brevo & Nodemailer Email Engine"]
+    end
+
+    subgraph External["Cloud Services"]
+        MongoDB[("MongoDB Atlas Database")]
+        Cloudinary["Cloudinary (Image Storage)"]
+        RazorpayAPI["Razorpay Payment Gateway"]
+        BrevoSMTP["Brevo / SMTP Email Service"]
+    end
+
+    Client -->|REST API over JSON / JWT| Server
+    Server --> MongoDB
+    Server --> Cloudinary
+    Client -->|Checkout Dialog| RazorpayAPI
+    Server -->|Cryptographic Verification| RazorpayAPI
+    Server -->|Transactional Emails & Tickets| BrevoSMTP
+```
+
+---
+
+## 💻 Tech Stack
 
 ### Frontend
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-- shadcn/ui components
-- React Router
-- React Query
+- **Framework**: [React 18](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+- **Build Tool**: [Vite](https://vitejs.dev/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) with custom dark theme gradients
+- **UI Components**: [shadcn/ui](https://ui.shadcn.com/) (Radix UI primitives)
+- **Data Fetching**: [TanStack React Query v5](https://tanstack.com/query/latest)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **QR Scanning**: `jsQR` & `@zxing/browser`
 
 ### Backend
-- Node.js
-- Express.js
-- PostgreSQL
-- JWT for authentication
-- bcryptjs for password hashing
+- **Runtime**: [Node.js](https://nodejs.org/) (ES Modules)
+- **Web Framework**: [Express.js](https://expressjs.com/)
+- **Database**: [MongoDB Atlas](https://www.mongodb.com/) via [Mongoose ODM](https://mongoosejs.com/)
+- **Authentication**: JSON Web Tokens (`jsonwebtoken`) & `bcryptjs`
+- **File Uploads**: `multer` + `multer-storage-cloudinary`
+- **Payments**: `razorpay` SDK with crypto signature validation
+- **PDF Generation**: `pdfkit` & `qrcode`
+- **Email Service**: `@getbrevo/brevo` & `nodemailer`
+- **Data Validation**: `express-validator` & `libphonenumber-js`
 
-## Prerequisites
+---
 
-Before you begin, ensure you have the following installed:
-- Node.js (v18 or higher)
-- PostgreSQL (v12 or higher)
-- npm or yarn
+## 📂 Project Directory Structure
 
-## Setup Instructions
-
-### 1. Clone the Repository
-
-```bash
-git clone <YOUR_GIT_URL>
-cd ticketcharge-hub-main
+```text
+gettogether/
+├── backend/
+│   ├── config/             # Database connection & Cloudinary setup
+│   ├── controllers/        # Business logic (Auth, Booking, Event, Admin, Payouts)
+│   ├── middleware/         # JWT auth, role validation & maintenance mode
+│   ├── models/             # Mongoose schemas (User, Event, Booking, Admin, OTP)
+│   ├── routes/             # RESTful API route definitions
+│   ├── utils/              # Email delivery & in-memory PDF ticket generators
+│   └── server.js           # Server entry point
+├── src/
+│   ├── components/         # Reusable UI & role-specific components
+│   │   ├── admin/          # Admin panels & layouts
+│   │   ├── organizer/      # Verification scanner & event manager
+│   │   └── ui/             # Radix / shadcn UI components
+│   ├── contexts/           # Authentication state context
+│   ├── lib/                # API client abstraction & utilities
+│   ├── pages/              # Routed pages (Home, Events, Dashboards, Auth)
+│   ├── App.tsx             # Route management & layout wrapping
+│   └── main.tsx            # Application bootstrapping
+├── public/                 # Static assets & icons
+└── package.json            # Root configuration & scripts
 ```
 
-### 2. Backend Setup
+---
 
-#### Install Dependencies
+## ⚡ Getting Started
+
+### Prerequisites
+Make sure you have installed:
+- **Node.js** (v18 or v20+)
+- **npm** or **bun**
+- A **MongoDB Atlas** database connection URI
+- (Optional for full features) Free API keys for **Cloudinary**, **Razorpay**, and **Brevo/Gmail App Password**
+
+---
+
+### Step 1: Clone the Repository
 
 ```bash
-cd backend
-npm install
+git clone https://github.com/dkvkaran06/Get-Together.git
+cd Get-Together
 ```
 
-#### Configure Environment Variables
+---
 
-Create a `.env` file in the `backend` directory:
+### Step 2: Configure Environment Variables
+
+#### 1. Backend Configuration
+Create a `.env` file in the `backend/` folder:
 
 ```bash
-cp backend/.env.example backend/.env
-```
-
-Edit `backend/.env` with your configuration:
-
-```env
-PORT=5000
+# Inside backend/.env
+PORT=5050
 NODE_ENV=development
+FRONTEND_URL=http://localhost:5173,http://localhost:8080,http://localhost:8081
 
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=ticketcharge_hub
-DB_USER=postgres
-DB_PASSWORD=your_postgres_password
+# Database
+MONGODB_URI=your_mongodb_atlas_connection_string
 
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-JWT_EXPIRE=7d
+# Authentication
+JWT_SECRET=your_jwt_secret_key_here
 
-FRONTEND_URL=http://localhost:5173
+# Razorpay (Payment Gateway)
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+
+# Cloudinary (Image Uploads)
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_key
+CLOUDINARY_API_SECRET=your_cloudinary_secret
+
+# Email Service (Brevo or Gmail SMTP)
+BREVO_API_KEY=your_brevo_api_key
+# Or standard SMTP:
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASSWORD=your_16_char_gmail_app_password
+EMAIL_FROM="GetTogether" <your_email@gmail.com>
 ```
 
-#### Create PostgreSQL Database
-
-```bash
-# Connect to PostgreSQL
-psql -U postgres
-
-# Create database
-CREATE DATABASE ticketcharge_hub;
-
-# Exit psql
-\q
-```
-
-#### Run Database Migrations
-
-```bash
-cd backend
-npm run migrate
-```
-
-This will create all necessary tables (users, events, bookings) and indexes.
-
-#### Start the Backend Server
-
-```bash
-# Development mode (with auto-reload)
-npm run dev
-
-# Production mode
-npm start
-```
-
-The backend server will start on `http://localhost:5000`
-
-### 3. Frontend Setup
-
-#### Install Dependencies
-
-```bash
-# From project root
-npm install
-```
-
-#### Configure Environment Variables
-
+#### 2. Frontend Configuration
 Create a `.env` file in the project root:
 
-```env
-VITE_API_URL=http://localhost:5000/api
-```
-
-#### Start the Development Server
-
 ```bash
-npm run dev
+# In the root directory (.env)
+VITE_API_URL=http://localhost:5050/api
+VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
 ```
 
-The frontend will start on `http://localhost:5173`
+---
 
-## Project Structure
+### Step 3: Install Dependencies & Run
 
-```
-ticketcharge-hub-main/
-├── backend/
-│   ├── config/
-│   │   └── database.js          # PostgreSQL connection
-│   ├── controllers/
-│   │   ├── authController.js     # Authentication logic
-│   │   ├── eventController.js    # Event CRUD operations
-│   │   └── userController.js     # User profile management
-│   ├── middleware/
-│   │   └── auth.js               # JWT authentication middleware
-│   ├── routes/
-│   │   ├── authRoutes.js         # Auth endpoints
-│   │   ├── eventRoutes.js        # Event endpoints
-│   │   └── userRoutes.js         # User endpoints
-│   ├── scripts/
-│   │   └── migrate.js            # Database migration script
-│   ├── server.js                 # Express server entry point
-│   └── package.json
-├── src/
-│   ├── components/               # React components
-│   ├── contexts/
-│   │   └── AuthContext.tsx       # Authentication context
-│   ├── lib/
-│   │   ├── api.ts                # API client functions
-│   │   └── utils.ts
-│   ├── pages/                    # Page components
-│   └── App.tsx
-└── package.json
-```
-
-## API Endpoints
-
-### Authentication
-- `POST /api/auth/signup` - User/Organizer sign up
-- `POST /api/auth/signin` - User/Organizer sign in
-- `GET /api/auth/me` - Get current user (requires auth)
-
-### Events
-- `GET /api/events` - Get all events (query params: `status`, `category`, `organizerId`)
-- `GET /api/events/:id` - Get single event
-- `GET /api/events/organizer/my-events` - Get organizer's events (requires auth)
-- `POST /api/events` - Create event (requires organizer auth)
-- `PUT /api/events/:id` - Update event (requires organizer auth)
-- `DELETE /api/events/:id` - Delete event (requires organizer auth)
-
-### Users
-- `GET /api/users/:id` - Get user profile
-- `PUT /api/users/profile` - Update user profile (requires auth)
-- `PUT /api/users/change-password` - Change password (requires auth)
-
-## Database Schema
-
-### Users Table
-- `id` - Primary key
-- `name` - User name
-- `email` - Unique email
-- `password` - Hashed password
-- `phone` - Phone number (optional)
-- `role` - 'user' or 'organizer'
-- `organization_name` - Organization name (for organizers)
-- `created_at` - Timestamp
-- `updated_at` - Timestamp
-
-### Events Table
-- `id` - Primary key
-- `organizer_id` - Foreign key to users
-- `title` - Event title
-- `description` - Event description
-- `category` - Event category
-- `date` - Event date/time
-- `location` - Event location
-- `price` - Ticket price
-- `image_url` - Event image URL
-- `total_tickets` - Total available tickets
-- `available_tickets` - Available tickets
-- `status` - 'upcoming', 'past', or 'cancelled'
-- `created_at` - Timestamp
-- `updated_at` - Timestamp
-
-### Bookings Table
-- `id` - Primary key
-- `user_id` - Foreign key to users
-- `event_id` - Foreign key to events
-- `quantity` - Number of tickets
-- `total_price` - Total booking price
-- `status` - 'confirmed', 'cancelled', or 'refunded'
-- `created_at` - Timestamp
-- `updated_at` - Timestamp
-
-## Usage
-
-### Creating an Account
-
-1. Click "Sign In" in the header
-2. Switch to "Sign Up" tab
-3. Fill in your details and create an account
-
-### Creating an Organizer Account
-
-1. Navigate to `/organizer/auth`
-2. Fill in organization details
-3. Create your organizer account
-
-### Creating Events (Organizers)
-
-1. Sign in as an organizer
-2. Use the API endpoint `POST /api/events` with the following data:
-   ```json
-   {
-     "title": "Event Title",
-     "description": "Event Description",
-     "category": "Music",
-     "date": "2024-12-31T18:00:00Z",
-     "location": "Venue Name, City",
-     "price": 50.00,
-     "totalTickets": 100
-   }
-   ```
-
-## Development
-
-### Running in Development Mode
-
-**Backend:**
+#### Start Backend Server:
 ```bash
 cd backend
+npm install
 npm run dev
 ```
+> The API will start on **`http://localhost:5050`** and automatically establish MongoDB connectivity.
 
-**Frontend:**
+#### Start Frontend Application:
+Open a second terminal window in the project root:
 ```bash
+npm install
 npm run dev
 ```
+> The web app will launch at **`http://localhost:5173`** (or `http://localhost:8080`).
 
-### Building for Production
+---
 
-**Frontend:**
-```bash
-npm run build
-```
+## 🔌 API Endpoints Reference
 
-**Backend:**
-```bash
-cd backend
-npm start
-```
+### 🔐 Authentication (`/api/auth`)
+| Method | Endpoint | Description | Access |
+|---|---|---|---|
+| `POST` | `/api/auth/signup` | Register as User or Organizer | Public |
+| `POST` | `/api/auth/signin` | Sign in with email and password | Public |
+| `POST` | `/api/auth/send-otp` | Request 6-digit login OTP | Public |
+| `POST` | `/api/auth/verify-otp` | Authenticate using OTP | Public |
+| `GET` | `/api/auth/me` | Fetch authenticated session | Private |
 
-## Troubleshooting
+### 🎪 Events (`/api/events`)
+| Method | Endpoint | Description | Access |
+|---|---|---|---|
+| `GET` | `/api/events` | Browse all events (supports category & search) | Public |
+| `GET` | `/api/events/:id` | Fetch specific event details | Public |
+| `POST` | `/api/events` | Create new event with image upload | Organizer |
+| `PUT` | `/api/events/:id` | Update event information | Organizer |
+| `DELETE`| `/api/events/:id` | Remove event listing | Organizer |
+| `GET` | `/api/events/organizer/my-events`| Get events created by logged-in organizer | Organizer |
 
-### Database Connection Issues
-- Ensure PostgreSQL is running
-- Check database credentials in `.env`
-- Verify database exists: `psql -U postgres -l`
+### 🎟️ Bookings & Verification (`/api/bookings`)
+| Method | Endpoint | Description | Access |
+|---|---|---|---|
+| `POST` | `/api/bookings` | Create booking & generate Razorpay order | Attendee |
+| `POST` | `/api/bookings/verify-payment` | Validate signature & issue tickets | Attendee |
+| `GET` | `/api/bookings/my-bookings` | List user ticket history | Attendee |
+| `GET` | `/api/bookings/:id/download-pdf`| Download in-memory PDF ticket | Attendee |
+| `POST` | `/api/bookings/verify-ticket` | Gatekeeper camera QR validation | Organizer |
 
-### CORS Issues
-- Ensure `FRONTEND_URL` in backend `.env` matches your frontend URL
-- Check that both servers are running
+### 🛡️ Administration (`/api/admin`)
+| Method | Endpoint | Description | Access |
+|---|---|---|---|
+| `POST` | `/api/admin/auth/login` | Administrator login | Public |
+| `GET` | `/api/admin/analytics/overview`| Platform GMV & user counts | Admin |
+| `GET` | `/api/admin/users` | List & manage platform users | Admin |
+| `GET` | `/api/admin/payouts` | Review organizer payout requests | Admin |
+| `PUT` | `/api/admin/settings/maintenance`| Toggle global maintenance mode | Admin |
 
-### Authentication Issues
-- Clear browser localStorage
-- Check JWT_SECRET is set in backend `.env`
-- Verify token is being sent in Authorization header
+---
 
-## Contributing
+## 🔒 Security Highlights
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+- **Stateless JWT Authorization**: Tokens with standard expiry passed via Authorization headers.
+- **Cryptographic Signature Verification**: Payments are confirmed solely on the server through HMAC SHA-256 verification against Razorpay secrets.
+- **Data Protection**: User passwords are excluded by default from queries (`select: false`) and hashed with `bcryptjs`.
+- **Duplicate Ticket Protection**: Every ticket possesses an individualized tracking record (`active` → `used`), stopping screenshot sharing at event gates.
+- **Maintenance Shield**: System-wide circuit breaker middleware prevents public database mutations during upgrades while preserving admin access.
 
-## License
+---
 
-This project is licensed under the MIT License.
+## 🤝 Contributing
 
-## Support
+Contributions make the open-source community an amazing place to learn, inspire, and create!
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-For issues and questions, please open an issue on GitHub.
+---
+
+## 📄 License
+
+Distributed under the **MIT License**. See `LICENSE` for more information.
+
+---
+
+<div align="center">
+  <sub>Built with ❤️ by <a href="https://github.com/dkvkaran06">Dev Karan</a></sub>
+</div>
